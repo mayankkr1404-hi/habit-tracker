@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Discipline Habit Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    margin:0;
+    background:#f4f7f1;
+    color:#222;
+}
+
+.container{
+    max-width:1300px;
+    margin:auto;
+    padding:20px;
+}
+
+.header{
+    background:#6fa84f;
+    color:white;
+    padding:22px;
+    border-radius:14px;
+    text-align:center;
+}
+
+.quote-box{
+    background:white;
+    margin:20px 0;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    border-left:6px solid #6fa84f;
+}
+
+.quote-box h3{
+    margin-top:0;
+    color:#4e7d35;
+}
+
+.controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:20px 0;
+}
+
+input, select, button{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #aaa;
+    font-size:15px;
+}
+
+button{
+    background:#6fa84f;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#55883a;
+}
+
+.edit-btn{
+    background:#f0ad4e;
+    margin-right:5px;
+}
+
+.delete-btn{
+    background:#d9534f;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.card{
+    background:white;
+    padding:18px;
+    border-radius:14px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+.card h2{
+    color:#6fa84f;
+}
+
+.progress-bar{
+    width:100%;
+    background:#ddd;
+    border-radius:20px;
+    overflow:hidden;
+    height:22px;
+}
+
+.progress-fill{
+    height:100%;
+    background:#6fa84f;
+    width:0%;
+    transition:0.4s;
+}
+
+.section-title{
+    margin-top:30px;
+    color:#4e7d35;
+}
+
+.tracker{
+    overflow:auto;
+    background:white;
+    padding:15px;
+    border-radius:14px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+table{
+    border-collapse:collapse;
+    width:100%;
+    min-width:900px;
+}
+
+th,td{
+    border:1px solid #ddd;
+    text-align:center;
+    padding:8px;
+}
+
+th{
+    background:#dcebd3;
+}
+
+.task-name{
+    min-width:190px;
+    font-weight:bold;
+    text-align:left;
+}
+
+.checkbox{
+    width:22px;
+    height:22px;
+    cursor:pointer;
+}
+
+.weekly-box{
+    background:white;
+    border-radius:14px;
+    padding:15px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    margin-top:20px;
+}
+
+.week-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:12px;
+    margin-top:15px;
+}
+
+.week-day{
+    padding:15px;
+    border-radius:14px;
+    background:#eef6e9;
+    text-align:center;
+    cursor:pointer;
+    border:2px solid transparent;
+}
+
+.week-day:hover{
+    border-color:#6fa84f;
+}
+
+.circle{
+    width:95px;
+    height:95px;
+    border-radius:50%;
+    background:conic-gradient(#6fa84f 0%, #ddd 0%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:12px auto;
+}
+
+.circle span{
+    background:white;
+    width:68px;
+    height:68px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.day-details{
+    margin-top:20px;
+    background:white;
+    padding:18px;
+    border-radius:14px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+.task-list{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:15px;
+}
+
+.done-box,.pending-box{
+    padding:15px;
+    border-radius:12px;
+}
+
+.done-box{
+    background:#e4f4dc;
+}
+
+.pending-box{
+    background:#fff1e6;
+}
+
+.analysis{
+    margin-top:20px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:15px;
+}
+
+.day-card{
+    background:white;
+    border-radius:14px;
+    padding:15px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+canvas{
+    background:white;
+    margin-top:20px;
+    padding:15px;
+    border-radius:14px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    width:100%;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Discipline Habit Tracker</h1>
+        <p>Turn your life into a game</p>
+    </div>
+
+    <div class="quote-box">
+        <h3>Today's Motivation</h3>
+        <p id="quoteText"></p>
+        <button onclick="newQuote()">New Quote</button>
+    </div>
+
+    <div class="controls">
+        <input type="text" id="taskInput" placeholder="Enter habit e.g. Gym">
+        <button onclick="addTask()">Add Habit</button>
+
+        <select id="monthSelect" onchange="changeMonth()"></select>
+        <select id="yearSelect" onchange="changeMonth()"></select>
+        <select id="weekSelect" onchange="renderWeeklyTracker()"></select>
+
+        <button onclick="resetMonth()">Reset Month</button>
+    </div>
+
+    <div class="stats">
+        <div class="card">
+            <h3>Number of Habits</h3>
+            <h2 id="habitCount">0</h2>
+        </div>
+
+        <div class="card">
+            <h3>Completed Habits</h3>
+            <h2 id="completedCount">0</h2>
+        </div>
+
+        <div class="card">
+            <h3>Monthly Progress</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <h2 id="progressPercent">0%</h2>
+        </div>
+
+        <div class="card">
+            <h3>Selected Week</h3>
+            <h2 id="weekName">Week 1</h2>
+        </div>
+    </div>
+
+    <h2 class="section-title">Monthly Habit Tracker</h2>
+    <div class="tracker">
+        <table id="trackerTable"></table>
+    </div>
+
+    <h2 class="section-title">Weekly Tracker</h2>
+    <div class="weekly-box">
+        <h2 id="weeklyTitle">Week 1</h2>
+        <div class="week-grid" id="weeklyGrid"></div>
+    </div>
+
+    <div class="day-details" id="dayDetails">
+        <h2>Click any day in weekly tracker</h2>
+        <p>It will show completed and pending tasks for that day.</p>
+    </div>
+
+    <h2 class="section-title">Daily Progress Chart</h2>
+    <canvas id="progressChart" height="130"></canvas>
+
+    <h2 class="section-title">Monthly Day Analysis</h2>
+    <div class="analysis" id="analysisBox"></div>
+
+</div>
+
+<script>
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [
+    "Wake up at 05:00 ⏰",
+    "Gym 💪",
+    "Reading / Learning 📖",
+    "Day Planning 🗓️",
+    "Budget Tracking 💰",
+    "Project Work 🎯",
+    "No Alcohol 🍃"
+];
+
+let data = JSON.parse(localStorage.getItem("habitData")) || {};
+
+const authors = [
+    "Bhagavad Gita",
+    "Swami Vivekananda",
+    "Chanakya",
+    "APJ Abdul Kalam",
+    "Marcus Aurelius",
+    "Socrates",
+    "Buddha",
+    "Confucius",
+    "Krishna",
+    "Aristotle",
+    "Rumi",
+    "Lao Tzu",
+    "Mahatma Gandhi",
+    "Osho",
+    "Sri Ramakrishna",
+    "Kabir",
+    "Rabindranath Tagore",
+    "Albert Einstein",
+    "Nikola Tesla",
+    "Bruce Lee"
+];
+
+const messages = [
+    "Discipline is the bridge between goals and success.",
+    "Control your mind before the mind controls you.",
+    "A focused person can achieve anything.",
+    "Do your duty without attachment to results.",
+    "Every small step matters.",
+    "Consistency creates greatness.",
+    "Your habits decide your future.",
+    "Success begins with self-discipline.",
+    "Master yourself to master life.",
+    "Action destroys fear.",
+    "The soul becomes what it thinks.",
+    "Peace comes from inner control.",
+    "Hard work always beats excuses.",
+    "One day or day one. You decide.",
+    "Self-control is true power.",
+    "A calm mind is unstoppable.",
+    "Discipline is freedom.",
+    "Small daily improvements create massive success.",
+    "Your future is built today.",
+    "Focus on progress, not perfection.",
+    "Victory starts in the mind.",
+    "Do not stop until your goal is reached.",
+    "Greatness is hidden in daily routine.",
+    "Patience and persistence create miracles.",
+    "The strongest warrior is self-control.",
+    "Mindset changes destiny.",
+    "Silence and discipline build power.",
+    "Train your mind like your body.",
+    "Purpose gives energy to life.",
+    "Fear disappears through action.",
+    "Distractions destroy potential.",
+    "Inner peace creates outer success.",
+    "The disciplined mind wins every battle.",
+    "Faith and action create results.",
+    "Your life reflects your habits.",
+    "Wake up with purpose.",
+    "A pure heart creates a powerful life.",
+    "Wisdom begins with self-awareness.",
+    "Growth requires discomfort.",
+    "A determined soul cannot be defeated.",
+    "True strength is mental strength.",
+    "Self-belief changes everything.",
+    "Your thoughts shape your reality.",
+    "Discipline creates confidence.",
+    "Energy flows where focus goes.",
+    "Keep moving forward.",
+    "A peaceful mind is priceless.",
+    "Master your emotions.",
+    "Do difficult things daily.",
+    "Consistency beats motivation."
+];
+
+let quotes = [];
+
+authors.forEach(author => {
+    messages.forEach(message => {
+        quotes.push(`${author}: ${message}`);
+    });
+});
+
+const monthSelect = document.getElementById("monthSelect");
+const yearSelect = document.getElementById("yearSelect");
+const weekSelect = document.getElementById("weekSelect");
+
+const months = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+];
+
+let currentDate = new Date();
+let selectedMonth = currentDate.getMonth();
+let selectedYear = currentDate.getFullYear();
+
+months.forEach((m,i)=>{
+    let opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = m;
+    if(i === selectedMonth) opt.selected = true;
+    monthSelect.appendChild(opt);
+});
+
+for(let y=2024;y<=2035;y++){
+    let opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = y;
+    if(y === selectedYear) opt.selected = true;
+    yearSelect.appendChild(opt);
+}
+
+function newQuote(){
+    let index = Math.floor(Math.random() * quotes.length);
+    document.getElementById("quoteText").textContent = quotes[index];
+}
+
+function save(){
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    localStorage.setItem("habitData", JSON.stringify(data));
+}
+
+function getKey(day, task){
+    return `${selectedYear}-${selectedMonth}-${day}-${task}`;
+}
+
+function daysInMonth(){
+    return new Date(selectedYear, selectedMonth + 1, 0).getDate();
+}
+
+function getWeeks(){
+    let days = daysInMonth();
+    let weeks = [];
+
+    for(let start=1; start<=days; start+=7){
+        let end = Math.min(start + 6, days);
+        weeks.push({start,end});
+    }
+
+    return weeks;
+}
+
+function updateWeekOptions(){
+    weekSelect.innerHTML = "";
+    let weeks = getWeeks();
+
+    weeks.forEach((week,index)=>{
+        let opt = document.createElement("option");
+        opt.value = index;
+        opt.textContent = `Week ${index + 1} (${week.start} - ${week.end})`;
+        weekSelect.appendChild(opt);
+    });
+}
+
+function changeMonth(){
+    selectedMonth = Number(monthSelect.value);
+    selectedYear = Number(yearSelect.value);
+    updateWeekOptions();
+    render();
+}
+
+function addTask(){
+    let input = document.getElementById("taskInput");
+    let value = input.value.trim();
+
+    if(value === ""){
+        alert("Enter a habit name");
+        return;
+    }
+
+    tasks.push(value);
+    input.value = "";
+    save();
+    render();
+}
+
+function editTask(index){
+    let oldTask = tasks[index];
+    let newTask = prompt("Edit habit name:", oldTask);
+
+    if(newTask === null) return;
+
+    newTask = newTask.trim();
+
+    if(newTask === ""){
+        alert("Habit name cannot be empty");
+        return;
+    }
+
+    let days = daysInMonth();
+
+    for(let d=1; d<=days; d++){
+        let oldKey = getKey(d, oldTask);
+        let newKey = `${selectedYear}-${selectedMonth}-${d}-${newTask}`;
+
+        if(data[oldKey] !== undefined){
+            data[newKey] = data[oldKey];
+            delete data[oldKey];
+        }
+    }
+
+    tasks[index] = newTask;
+    save();
+    render();
+}
+
+function deleteTask(index){
+    if(confirm("Delete this habit?")){
+        let task = tasks[index];
+        let days = daysInMonth();
+
+        for(let d=1; d<=days; d++){
+            delete data[getKey(d, task)];
+        }
+
+        tasks.splice(index,1);
+        save();
+        render();
+    }
+}
+
+function toggle(day, task){
+    let key = getKey(day, task);
+    data[key] = !data[key];
+    save();
+    render();
+}
+
+function render(){
+    renderTable();
+    renderStats();
+    renderWeeklyTracker();
+    renderAnalysis();
+    drawChart();
+}
+
+function renderTable(){
+    let table = document.getElementById("trackerTable");
+    let days = daysInMonth();
+
+    let html = `<tr><th class="task-name">${months[selectedMonth]}</th>`;
+
+    for(let d=1; d<=days; d++){
+        let date = new Date(selectedYear, selectedMonth, d);
+        let dayName = date.toLocaleDateString("en-US",{weekday:"short"});
+        html += `<th>${dayName}<br>${d}</th>`;
+    }
+
+    html += `<th>Done</th><th>Progress</th><th>Action</th></tr>`;
+
+    tasks.forEach((task,index)=>{
+        let done = 0;
+        html += `<tr><td class="task-name">${task}</td>`;
+
+        for(let d=1; d<=days; d++){
+            let checked = data[getKey(d,task)] ? "checked" : "";
+            if(checked) done++;
+
+            html += `
+            <td>
+                <input type="checkbox" class="checkbox" ${checked}
+                onclick="toggle(${d}, '${task.replace(/'/g,"\\'")}')">
+            </td>`;
+        }
+
+        let percentage = Math.round((done / days) * 100);
+
+        html += `
+        <td>${done}/${days}</td>
+        <td>${percentage}%</td>
+        <td>
+            <button class="edit-btn" onclick="editTask(${index})">Edit</button>
+            <button class="delete-btn" onclick="deleteTask(${index})">Delete</button>
+        </td>
+        </tr>`;
+    });
+
+    table.innerHTML = html;
+}
+
+function renderStats(){
+    let days = daysInMonth();
+    let total = tasks.length * days;
+    let completed = 0;
+
+    tasks.forEach(task=>{
+        for(let d=1; d<=days; d++){
+            if(data[getKey(d,task)]) completed++;
+        }
+    });
+
+    let progress = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+    document.getElementById("habitCount").textContent = tasks.length;
+    document.getElementById("completedCount").textContent = completed;
+    document.getElementById("progressPercent").textContent = progress + "%";
+    document.getElementById("progressFill").style.width = progress + "%";
+
+    let selectedWeekIndex = Number(weekSelect.value || 0);
+    document.getElementById("weekName").textContent = "Week " + (selectedWeekIndex + 1);
+}
+
+function renderWeeklyTracker(){
+    let weeks = getWeeks();
+    let selectedWeekIndex = Number(weekSelect.value || 0);
+    let week = weeks[selectedWeekIndex];
+
+    if(!week) return;
+
+    document.getElementById("weeklyTitle").textContent =
+        `Week ${selectedWeekIndex + 1} - ${months[selectedMonth]} ${week.start} to ${week.end}`;
+
+    document.getElementById("weekName").textContent = "Week " + (selectedWeekIndex + 1);
+
+    let grid = document.getElementById("weeklyGrid");
+    grid.innerHTML = "";
+
+    for(let d=week.start; d<=week.end; d++){
+        let done = 0;
+
+        tasks.forEach(task=>{
+            if(data[getKey(d,task)]) done++;
+        });
+
+        let percent = tasks.length === 0 ? 0 : Math.round((done / tasks.length) * 100);
+        let date = new Date(selectedYear, selectedMonth, d);
+        let dayName = date.toLocaleDateString("en-US",{weekday:"long"});
+
+        grid.innerHTML += `
+        <div class="week-day" onclick="showDayDetails(${d})">
+            <h3>${dayName}</h3>
+            <p>${d} ${months[selectedMonth]}</p>
+            <div class="circle" style="background:conic-gradient(#6fa84f ${percent}%, #ddd ${percent}%);">
+                <span>${percent}%</span>
+            </div>
+            <p>${done}/${tasks.length} Completed</p>
+        </div>`;
+    }
+}
+
+function showDayDetails(day){
+    let completedTasks = [];
+    let pendingTasks = [];
+
+    tasks.forEach(task=>{
+        if(data[getKey(day,task)]){
+            completedTasks.push(task);
+        }else{
+            pendingTasks.push(task);
+        }
+    });
+
+    let date = new Date(selectedYear, selectedMonth, day);
+    let dayName = date.toLocaleDateString("en-US",{weekday:"long"});
+
+    let completedHTML = completedTasks.length
+        ? completedTasks.map(t=>`<li>✅ ${t}</li>`).join("")
+        : "<li>No task completed</li>";
+
+    let pendingHTML = pendingTasks.length
+        ? pendingTasks.map(t=>`<li>❌ ${t}</li>`).join("")
+        : "<li>All tasks completed</li>";
+
+    document.getElementById("dayDetails").innerHTML = `
+        <h2>${dayName}, ${day} ${months[selectedMonth]} ${selectedYear}</h2>
+        <div class="task-list">
+            <div class="done-box">
+                <h3>Completed Tasks</h3>
+                <ul>${completedHTML}</ul>
+            </div>
+
+            <div class="pending-box">
+                <h3>Tasks Still Need To Be Done</h3>
+                <ul>${pendingHTML}</ul>
+            </div>
+        </div>
+    `;
+}
+
+function renderAnalysis(){
+    let box = document.getElementById("analysisBox");
+    let days = daysInMonth();
+    box.innerHTML = "";
+
+    for(let d=1; d<=days; d++){
+        let done = 0;
+
+        tasks.forEach(task=>{
+            if(data[getKey(d,task)]) done++;
+        });
+
+        let percent = tasks.length === 0 ? 0 : Math.round((done / tasks.length) * 100);
+
+        let date = new Date(selectedYear, selectedMonth, d);
+        let dayName = date.toLocaleDateString("en-US",{weekday:"short"});
+
+        box.innerHTML += `
+        <div class="day-card" onclick="showDayDetails(${d})">
+            <h3>${dayName} ${d}</h3>
+            <div class="circle" style="background:conic-gradient(#6fa84f ${percent}%, #ddd ${percent}%);">
+                <span>${percent}%</span>
+            </div>
+            <p>Completed: ${done}/${tasks.length}</p>
+        </div>`;
+    }
+}
+
+function drawChart(){
+    let canvas = document.getElementById("progressChart");
+    let ctx = canvas.getContext("2d");
+    let days = daysInMonth();
+
+    canvas.width = canvas.offsetWidth;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    let values = [];
+
+    for(let d=1; d<=days; d++){
+        let done = 0;
+
+        tasks.forEach(task=>{
+            if(data[getKey(d,task)]) done++;
+        });
+
+        values.push(tasks.length === 0 ? 0 : (done / tasks.length) * 100);
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(40,100);
+
+    values.forEach((v,i)=>{
+        let x = 40 + i * ((canvas.width - 70) / days);
+        let y = 110 - v;
+        ctx.lineTo(x,y);
+    });
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#6fa84f";
+    ctx.stroke();
+
+    ctx.fillStyle = "#222";
+    ctx.font = "14px Arial";
+    ctx.fillText("Daily Progress Chart", 40, 20);
+}
+
+function resetMonth(){
+    if(confirm("Clear all tracking data for this month?")){
+        let days = daysInMonth();
+
+        tasks.forEach(task=>{
+            for(let d=1; d<=days; d++){
+                delete data[getKey(d,task)];
+            }
+        });
+
+        save();
+        render();
+    }
+}
+
+updateWeekOptions();
+newQuote();
+render();
+</script>
+
+</body>
+</html>
